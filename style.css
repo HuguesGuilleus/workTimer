@@ -1,0 +1,12 @@
+/* Octobre 2020 GUILLEUS Hugues ghugues[at]netc.fr */
+
+body {
+	font-family: sans-serif;
+	font-size: x-large;
+}
+
+button {
+	display: table;
+	margin: 1ex;
+	font-size: unset;
+}
