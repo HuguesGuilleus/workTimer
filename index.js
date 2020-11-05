@@ -42,27 +42,30 @@ class Timer {
 	constructor(delay) {
 		this.delay = delay;
 		this.begin = new Date();
-		this.interval = setInterval(() => this.update(), SECOND);
+		this.interval = setInterval(() => this.update(), SECOND / 60);
 		this.timeout = setTimeout(() => this.end(), delay);
 		printDuration(0, 0);
 		bar.style.strokeDasharray = '0 ' + barCircumference;
+		$('launch').hidden = true;
+		$('run').hidden = false;
 	}
 	update() {
 		const delay = Math.trunc((new Date() - this.begin) / SECOND);
 		const m = Math.trunc(delay / (MINUTE / SECOND));
 		const s = delay % (MINUTE / SECOND);
 		printDuration(m, s);
-		bar.style.strokeDasharray = `${delay*SECOND*barCircumference/this.delay} ${barCircumference}`
+		bar.style.strokeDasharray = `${(new Date() - this.begin)*barCircumference/this.delay} ${barCircumference}`
 	}
 	drop() {
 		clearTimeout(this.timeout);
 		clearInterval(this.interval);
-		out.innerText = 'Stopé';
-		bar.value = 0;
+		$('launch').hidden = false;
+		$('run').hidden = true;
+		bar.style.strokeDasharray = barCircumference + ' ' + barCircumference;
+		printDuration(0, 0);
 	}
 	async end() {
 		this.drop();
-		out.innerText = 'Fin';
 
 		new Notification('Fin décompte', {
 			body: `Décompte de ${Math.trunc(this.delay/MINUTE)}`,

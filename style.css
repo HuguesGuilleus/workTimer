@@ -3,10 +3,37 @@
 body {
 	font-family: sans-serif;
 	font-size: x-large;
+	background-color: Window;
+	color: WindowText;
+	padding: 3ex;
+}
+
+main {
+	min-height: 100vh;
+}
+
+#run > * {
+	display: table;
+	margin: auto;
+}
+
+#progress {
+	max-width: 80vw;
+	max-height: 80vh;
+}
+
+#bar {
+	stroke: dodgerblue;
+}
+
+#barBack {
+	stroke: WindowText;
+	opacity: 5%;
 }
 
 button {
 	display: table;
-	margin: 1ex;
+	margin: 1ex 1ex 1ex 0;
 	font-size: unset;
+	font-size: xx-large;
 }
