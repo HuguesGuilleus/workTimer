@@ -15,28 +15,32 @@
 <body>
 	<h1>Work Timer</h1>
 
-	<p>bite</p>
 
 	<div>
-		Nombre de minutes pour le travail&nbsp;: <input type=number id=delayWork value=20><br>
-		Nombre de minutes pour le bonus&nbsp;: <input type=number id=delayExtra value=3><br>
-		Nombre de minutes pour la pause&nbsp;: <input type=number id=delayBreak value=2><br>
-		<hr>
 		<button type=click id=goWork>Go work</button>
 		<button type=click id=goExtra>Go extra</button>
 		<button type=click id=goBreak>Go break</button>
 		<button type=click id=stop>Stop</button>
 		<br>
-		<progress value=0 id=bar></progress>
-		<output id=out></output>
+		<svg viewbox="0 0 100 100" width=200>
+			<path id=bar fill="none" stroke-width="5" d="M50 10
+				a 40 40 0 0 1 0 80
+				a 40 40 0 0 1 0 -80" />
+			<text id=out x="50" y="50" text-anchor="middle" dy="7" font-size="20">50%</text>
+		</svg>
+		<hr>
+		Nombre de minutes pour le travail&nbsp;: <input type=number id=delayWork value=20><br>
+		Nombre de minutes pour le bonus&nbsp;: <input type=number id=delayExtra value=3><br>
+		Nombre de minutes pour la pause&nbsp;: <input type=number id=delayBreak value=2><br>
 	</div>
 
 	<footer>
 		<hr>
 		<button type="button" id=pwaUpdate>Mise à jour</button>
 		<hr>
-		Octobre 2020 GUILLEUS Hugues ghugues[at]netc.fr<br>
-		Les sons viennes de&nbsp;: <a href="https://lasonotheque.org/">LaSonotheque.org</a>
+		Octobre, Novembre 2020 GUILLEUS Hugues ghugues[at]netc.fr<br>
+		BSD 3-Clause License<br>
+		Sauf les sons qui viennes de&nbsp;: <a href="https://lasonotheque.org/">LaSonotheque.org</a>
 	</footer>
 
 	<span hidden id=pwdNeedNetwork>La mise à jour de l'application à besoin du réseau.</span>

@@ -4,7 +4,8 @@ var timer = null,
 	out, bar;
 
 const SECOND = 1000,
-	MINUTE = 60 * SECOND;
+	MINUTE = 60 * SECOND,
+	barCircumference = 282.6;
 
 document.addEventListener('DOMContentLoaded', () => {
 	const delayWork = $('delayWork');
@@ -39,19 +40,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
 class Timer {
 	constructor(delay) {
-		bar.max = delay;
 		this.delay = delay;
 		this.begin = new Date();
 		this.interval = setInterval(() => this.update(), SECOND);
-		printDuration(0, 0);
 		this.timeout = setTimeout(() => this.end(), delay);
+		printDuration(0, 0);
+		bar.style.strokeDasharray = '0 ' + barCircumference;
 	}
 	update() {
 		const delay = Math.trunc((new Date() - this.begin) / SECOND);
 		const m = Math.trunc(delay / (MINUTE / SECOND));
 		const s = delay % (MINUTE / SECOND);
 		printDuration(m, s);
-		bar.value = delay * SECOND;
+		bar.style.strokeDasharray = `${delay*SECOND*barCircumference/this.delay} ${barCircumference}`
 	}
 	drop() {
 		clearTimeout(this.timeout);
@@ -81,7 +82,7 @@ function printDuration(m, s) {
 	const pn = n => n.toLocaleString('nu-arabic', {
 		minimumIntegerDigits: 2
 	});
-	out.innerText = `Durée: ${pn(m)}:${pn(s)}`;
+	out.textContent = `${pn(m)}:${pn(s)}`;
 }
 
 function wait(delay) {
