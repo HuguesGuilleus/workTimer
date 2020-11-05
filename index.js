@@ -43,13 +43,15 @@ class Timer {
 		this.delay = delay;
 		this.begin = new Date();
 		this.interval = setInterval(() => this.update(), SECOND);
+		printDuration(0, 0);
 		this.timeout = setTimeout(() => this.end(), delay);
 	}
 	update() {
-		const s = Math.trunc((new Date() - this.begin) / SECOND) % MINUTE;
-		const m = Math.trunc((new Date() - this.begin) / MINUTE);
-		out.innerText = `durée: ${m}:${s}`;
-		bar.value = new Date() - this.begin;
+		const delay = Math.trunc((new Date() - this.begin) / SECOND);
+		const m = Math.trunc(delay / (MINUTE / SECOND));
+		const s = delay % (MINUTE / SECOND);
+		printDuration(m, s);
+		bar.value = delay * SECOND;
 	}
 	drop() {
 		clearTimeout(this.timeout);
@@ -73,6 +75,13 @@ class Timer {
 			await wait(200);
 		}
 	}
+}
+
+function printDuration(m, s) {
+	const pn = n => n.toLocaleString('nu-arabic', {
+		minimumIntegerDigits: 2
+	});
+	out.innerText = `Durée: ${pn(m)}:${pn(s)}`;
 }
 
 function wait(delay) {
