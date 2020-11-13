@@ -5,7 +5,7 @@ var timer = null,
 
 const SECOND = 1000,
 	MINUTE = 60 * SECOND,
-	barCircumference = 282.6;
+	barCircumference = Math.PI * 2 * 40;
 
 document.addEventListener('DOMContentLoaded', () => {
 	const delayWork = $('delayWork');
