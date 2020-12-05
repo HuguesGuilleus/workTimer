@@ -37,3 +37,39 @@ button {
 	font-size: unset;
 	font-size: xx-large;
 }
+
+/* GRAPH */
+
+#graph {
+	display: grid;
+	grid-template-columns: repeat(7, 1.5ex);
+	grid-gap: 0.2ex;
+	margin: 2ex 0;
+}
+
+#graph > div {
+	height: 1.5ex;
+	border-radius: 0.2ex;
+}
+#graph > div:hover {
+	background: green !important;
+}
+
+.graph-nb-0 {
+	background-color: hsl(0, 0%, 90%);
+}
+.graph-nb-1 {
+	background-color: hsl(210, 100%, 90%);
+}
+.graph-nb-2 {
+	background-color: hsl(210, 100%, 80%);
+}
+.graph-nb-3 {
+	background-color: hsl(210, 100%, 60%);
+}
+.graph-nb-4 {
+	background-color: hsl(210, 100%, 40%);
+}
+.graph-nb-5 {
+	background-color: hsl(210, 100%, 20%);
+}
