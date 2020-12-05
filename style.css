@@ -44,7 +44,7 @@ button {
 	display: grid;
 	grid-template-columns: repeat(7, 1.5ex);
 	grid-gap: 0.2ex;
-	margin: 2ex 0;
+	margin: 2ex 0 1ex;
 }
 
 #graph > div {
@@ -53,6 +53,17 @@ button {
 }
 #graph > div:hover {
 	background: green !important;
+}
+
+#graphSave {
+	display: table;
+	margin-bottom: 1ex;
+	padding: 0.1ex;
+	font-size: smaller;
+}
+#graphSave:hover {
+	background: Field;
+	color: FieldText;
 }
 
 .graph-nb-0 {
@@ -72,4 +83,11 @@ button {
 }
 .graph-nb-5 {
 	background-color: hsl(210, 100%, 20%);
+}
+
+/* DROP ZONE */
+#drop {
+	font-size: xx-large;
+	text-align: center;
+	margin: 20vh;
 }

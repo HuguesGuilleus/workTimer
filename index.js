@@ -23,17 +23,17 @@ document.addEventListener('DOMContentLoaded', () => {
 	$('goWork').addEventListener('click', () => {
 		stop();
 		Notification.requestPermission(r => {});
-		timer = new Timer(delayWork.value * MINUTE);
+		timer = new Timer(delayWork.value * MINUTE, true);
 	});
 	$('goExtra').addEventListener('click', () => {
 		stop();
 		Notification.requestPermission(r => {});
-		timer = new Timer(delayExtra.value * MINUTE);
+		timer = new Timer(delayExtra.value * MINUTE, false);
 	});
 	$('goBreak').addEventListener('click', () => {
 		stop();
 		Notification.requestPermission(r => {});
-		timer = new Timer(delayBreak.value * MINUTE);
+		timer = new Timer(delayBreak.value * MINUTE, false);
 	});
 	$('stop').addEventListener('click', stop);
 }, {
@@ -41,7 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 class Timer {
-	constructor(delay) {
+	constructor(delay, towork) {
+		this.towork = towork;
 		this.delay = delay;
 		this.begin = new Date();
 		this.interval = setInterval(() => this.update(), SECOND / 60);
@@ -68,6 +69,7 @@ class Timer {
 	}
 	async end() {
 		this.drop();
+		if (this.towork) sessions.addToday();
 
 		new Notification('Fin décompte', {
 			body: `Décompte de ${Math.trunc(this.delay/MINUTE)}`,
@@ -117,6 +119,40 @@ class Sessions {
 		window.localStorage.setItem(Sessions.STORAGE, this.toJSON());
 	}
 	constructor(obj) {
+		this.graph = $('graph');
+		this.graphText = $('graphText');
+		this.drop = $('drop');
+		this.load(obj);
+
+		$('graphSave').onclick = () => {
+			const blob = new Blob([this.toJSON()], {
+				type: 'application/json',
+			});
+			const u = URL.createObjectURL(blob);
+			let a = document.createElement('a');
+			document.body.append(a);
+			a.href = u;
+			a.download = 'sessions.json';
+			a.click();
+			a.remove();
+			URL.revokeObjectURL(u);
+		};
+
+		document.ondragover = event => event.preventDefault();
+		document.ondrop = async event => {
+			event.preventDefault();
+			if (event.dataTransfer.files.length == 0) return;
+			this.load(JSON.parse(
+				await event.dataTransfer.files[0].text()
+			));
+			this.storageSave();
+			this.drop.hidden = true;
+		};
+		document.ondragleave = () => this.drop.hidden = true;
+		document.ondragenter = () => this.drop.hidden = false;
+	}
+	// load data from obj.
+	load(obj) {
 		const nbDay = 2 * 7 + new Date().getDay();
 		let day = Sessions.now() - nbDay * Sessions.DAY;
 		this.days = new Map();
@@ -130,8 +166,6 @@ class Sessions {
 			.filter(([d, nb]) => !isNaN(d) && this.days.has(d) && !isNaN(nb))
 			.forEach(([d, nb]) => this.days.set(d, nb));
 
-		this.graph = $('graph');
-		this.graphText = $('graphText');
 		this.display();
 	}
 	toJSON() {
