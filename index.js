@@ -104,7 +104,7 @@ class Sessions {
 	static STORAGE = 'work-sessions';
 	static DAY = 24 * 3600 * 1000;
 	static set2Day(d) {
-		return Math.round(d / Sessions.DAY) * Sessions.DAY;
+		return Math.trunc(d / Sessions.DAY) * Sessions.DAY;
 	}
 	static now() {
 		return Sessions.set2Day(Date.now());
@@ -113,7 +113,7 @@ class Sessions {
 		return new Sessions(JSON.parse(j));
 	}
 	static storageImport() {
-		return new Sessions(window.localStorage.getItem(Sessions.STORAGE));
+		return Sessions.fromJSON(window.localStorage.getItem(Sessions.STORAGE));
 	}
 	storageSave() {
 		window.localStorage.setItem(Sessions.STORAGE, this.toJSON());
@@ -153,13 +153,15 @@ class Sessions {
 	}
 	// load data from obj.
 	load(obj) {
-		const nbDay = 2 * 7 + new Date().getDay();
+		const d = new Date().getDay();
+		const nbDay = 2 * 7 + (d ? d - 1 : 6);
 		let day = Sessions.now() - nbDay * Sessions.DAY;
 		this.days = new Map();
 		for (let i = 0; i < nbDay; i++) {
 			this.days.set(day, 0);
 			day += Sessions.DAY;
 		}
+		this.days.set(Sessions.now(), 0);
 
 		Object.keys(obj || {})
 			.map(k => [Sessions.set2Day(Date.parse(k)), Number(obj[k])])
@@ -191,7 +193,7 @@ class Sessions {
 			const d = new Date(k);
 			let div = document.createElement('div');
 			this.graph.append(div);
-			div.classList.add(`graph-nb-${Math.round(nb*5/max)}`);
+			div.classList.add(`graph-nb-${nb?Math.round(nb*4/max)+1:0}`);
 			div.addEventListener('mouseover', () => {
 				this.graphText.innerText = `[${nb}] ${d.toLocaleDateString()}`;
 			});
