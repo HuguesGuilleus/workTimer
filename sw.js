@@ -15,24 +15,24 @@ const assets = [
 ];
 
 if (location.hostname !== 'localhost') {
+	var c = null;
 	self.addEventListener('install', async event => {
 		await Promise.all(
 			(await caches.keys())
 			.map(c => caches.delete(c))
 		);
-		await caches.open(assetsVersion).then(c => c.addAll(assets));
+		c = await caches.open(assetsVersion);
 		skipWaiting();
+		c.addAll(assets);
 	});
 
 	self.addEventListener('fetch', event => event.respondWith(
-		caches.open(assetsVersion)
-		.then(c => c.match(event.request))
-		.then(rep => rep ||
+		c.match(event.request).then(rep => rep ||
 			fetch(event.request).then(rep => {
 				if (!rep.ok) throw new TypeError('Bad response status');
 				caches.open(assetsVersion).then(c => c.put(event.request, rep));
 				return rep.clone();
-			}).catch(() => new Response('fetch error, maybe the navigator is offline.\n', {
+			}).catch(err => new Response('fetch error, maybe the navigator is offline.\n' + err, {
 				status: 404,
 				statusText: 'offline',
 			}))

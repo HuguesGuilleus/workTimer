@@ -32,7 +32,7 @@ main {
 }
 
 button {
-	display: table;
+	display: inline-block;
 	margin: 1ex 1ex 1ex 0;
 	font-size: unset;
 	font-size: xx-large;
@@ -42,14 +42,14 @@ button {
 
 #graph {
 	display: grid;
-	grid-template-columns: repeat(7, 1.5ex);
+	grid-template-columns: repeat(53, 1.1ex);
 	grid-gap: 0.2ex;
 	margin: 2ex 0 1ex;
 }
 
 #graph > div {
-	height: 1.5ex;
-	border-radius: 0.2ex;
+	height: 1.1ex;
+	border-radius: 0.15ex;
 }
 #graph > div:hover {
 	background: green !important;
@@ -90,4 +90,6 @@ button {
 	font-size: xx-large;
 	text-align: center;
 	margin: 20vh;
+	min-width: calc(100vw - 40vh);
+	min-height: calc(100vh - 40vh);
 }

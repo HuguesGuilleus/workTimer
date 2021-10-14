@@ -6,6 +6,7 @@
 	<link rel=icon href="favicon.png">
 	<link rel=stylesheet href="style.css">
 	<meta name=viewport content="width=device-width, initial-scale=1">
+	<script src="index.js" defer></script>
 
 	<title>Work Timer</title>
 	<link rel=manifest href="manifest.webmanifest">
@@ -45,9 +46,11 @@
 	</main>
 
 	<footer>
+		<p>La liste de vos séances de travail est gardée uniquement dans votre navigateur grâce à l'API <i>localStorage</i>, elle n'est en aucun cas envoyée vers le serveur.</p>
+		<button type="button" id=removeData>Effacer la liste des séances</button>
 		<button type="button" id=pwaUpdate>Mise à jour</button>
 		<br>
-		Octobre, Novembre 2020 GUILLEUS Hugues ghugues[at]netc.fr<br>
+		Développé en 2020 et 2021 par Hugues GUILLEUS, ghugues[at]netc[dot]fr<br>
 		BSD 3-Clause License<br>
 		Sauf les sons qui viennes de&nbsp;: <a href="https://lasonotheque.org/">LaSonotheque.org</a>
 	</footer>
@@ -55,7 +58,6 @@
 	<span hidden id=pwdNeedNetwork>La mise à jour de l'application à besoin du réseau.</span>
 	<span hidden id=pwdCurrentUpdate>Mise à jour de l'application. Merci de patienter.</span>
 
-	<script src="index.js"></script>
 	<script src="pwa.js"></script>
 </body>
 
