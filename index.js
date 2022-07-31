@@ -116,6 +116,7 @@ function $(id) {
 class Sessions {
 	static STORAGE = "work-sessions";
 	static DAY = 24 * 3600 * 1000;
+	static TIMEZONE_OFFSET = new Date().getTimezoneOffset();
 	// Return the millisecond 0 of the day d (in millisecond since Epoch).
 	// Used to uniform the day index.
 	static set2Day(d) {
@@ -123,7 +124,7 @@ class Sessions {
 	}
 	// Return the present day ready for indexing.
 	static now() {
-		return Sessions.set2Day(Date.now());
+		return Sessions.set2Day(Date.now() - TIMEZONE_OFFSET);
 	}
 	// Create a new Session object from json string.
 	static fromJSON(j) {
