@@ -2,7 +2,8 @@
 
 var timer = null,
 	sessions = null,
-	out, bar;
+	out,
+	bar;
 
 const SECOND = 1000,
 	MINUTE = 60 * SECOND,
@@ -10,38 +11,42 @@ const SECOND = 1000,
 
 function main() {
 	sessions = Sessions.storageImport();
-	const delayWork = $('delayWork');
-	const delayExtra = $('delayExtra');
-	const delayBreak = $('delayBreak');
-	out = $('out');
-	bar = $('bar')
+	const delayWork = $("delayWork");
+	const delayExtra = $("delayExtra");
+	const delayBreak = $("delayBreak");
+	out = $("out");
+	bar = $("bar");
 
 	function stop() {
 		if (timer) timer.drop();
 	}
 
-	$('goWork').addEventListener('click', () => {
+	$("goWork").addEventListener("click", () => {
 		stop();
 		Notification.requestPermission(r => {});
 		timer = new Timer(delayWork.value * MINUTE, true);
 	});
-	$('goExtra').addEventListener('click', () => {
+	$("goExtra").addEventListener("click", () => {
 		stop();
 		Notification.requestPermission(r => {});
 		timer = new Timer(delayExtra.value * MINUTE, false);
 	});
-	$('goBreak').addEventListener('click', () => {
+	$("goBreak").addEventListener("click", () => {
 		stop();
 		Notification.requestPermission(r => {});
 		timer = new Timer(delayBreak.value * MINUTE, false);
 	});
-	$('stop').addEventListener('click', stop);
-	$('removeData').addEventListener('click', () => {
-		if (window.confirm("Étes vous sur de vouloir effacer vos donné, vous ne pourez plus les récupérer.")) {
+	$("stop").addEventListener("click", stop);
+	$("removeData").addEventListener("click", () => {
+		if (
+			window.confirm(
+				"Étes vous sur de vouloir effacer vos donné, vous ne pourez plus les récupérer."
+			)
+		) {
 			Sessions.removeData();
 		}
 	});
-};
+}
 
 class Timer {
 	constructor(delay, towork) {
@@ -51,52 +56,55 @@ class Timer {
 		this.interval = setInterval(() => this.update(), SECOND / 60);
 		this.timeout = setTimeout(() => this.end(), delay);
 		Timer.printDuration(0, 0);
-		bar.style.strokeDasharray = '0 ' + barCircumference;
-		$('launch').hidden = true;
-		$('run').hidden = false;
+		bar.style.strokeDasharray = "0 " + barCircumference;
+		$("launch").hidden = true;
+		$("run").hidden = false;
 	}
 	update() {
 		const delay = Math.trunc((new Date() - this.begin) / SECOND);
 		const m = Math.trunc(delay / (MINUTE / SECOND));
 		const s = delay % (MINUTE / SECOND);
 		Timer.printDuration(m, s);
-		bar.style.strokeDasharray = `${(new Date() - this.begin)*barCircumference/this.delay} ${barCircumference}`
+		bar.style.strokeDasharray = `${((new Date() - this.begin) *
+			barCircumference) /
+			this.delay} ${barCircumference}`;
 	}
 	drop() {
 		clearTimeout(this.timeout);
 		clearInterval(this.interval);
-		$('launch').hidden = false;
-		$('run').hidden = true;
-		bar.style.strokeDasharray = barCircumference + ' ' + barCircumference;
+		$("launch").hidden = false;
+		$("run").hidden = true;
+		bar.style.strokeDasharray = barCircumference + " " + barCircumference;
 		Timer.printDuration(0, 0);
 	}
 	async end() {
 		this.drop();
 		if (this.towork) sessions.addToday();
 
-		new Notification('Fin décompte', {
-			body: `Décompte de ${Math.trunc(this.delay/MINUTE)}`,
-			icon: 'favicon.png',
+		new Notification("Fin décompte", {
+			body: `Décompte de ${Math.trunc(this.delay / MINUTE)}`,
+			icon: "favicon.png",
 			vibrate: [1000],
-			tag: 'vibration-sample',
+			tag: "vibration-sample"
 		});
 
 		for (let i = 0; i < 5; i++) {
-			new Audio(`audio/${Math.trunc(Math.random()*2)+1}.mp3`).play();
+			new Audio(`audio/${Math.trunc(Math.random() * 2) + 1}.mp3`).play();
 			await wait(200);
 		}
 	}
 	static printDuration(m, s) {
-		const pn = n => n.toLocaleString('nu-arabic', {
-			minimumIntegerDigits: 2
-		});
+		const pn = n =>
+			n.toLocaleString("nu-arabic", {
+				minimumIntegerDigits: 2
+			});
 		out.textContent = `${pn(m)}:${pn(s)}`;
 	}
 }
 
 // Return a promise that resolve in the delay milisecond in the future.
 function wait(delay) {
-	return new Promise(end => setTimeout(end, delay));;
+	return new Promise(end => setTimeout(end, delay));
 }
 
 // Get element with the id.
@@ -106,7 +114,7 @@ function $(id) {
 
 // Save, restore and display all work sessions of this year.
 class Sessions {
-	static STORAGE = 'work-sessions';
+	static STORAGE = "work-sessions";
 	static DAY = 24 * 3600 * 1000;
 	// Return the millisecond 0 of the day d (in millisecond since Epoch).
 	// Used to uniform the day index.
@@ -133,19 +141,21 @@ class Sessions {
 		window.localStorage.setItem(Sessions.STORAGE, this.toJSON());
 	}
 	constructor(obj) {
-		this.graph = $('graph');
-		this.graphText = $('graphText');
-		this.drop = $('drop');
+		this.graph = $("graph");
+		this.graphText = $("graphText");
+		this.drop = $("drop");
 		this.load(obj);
 
-		$('graphSave').onclick = () => {
-			const a = document.createElement('a'),
-				u = URL.createObjectURL(new Blob([this.toJSON()], {
-					type: 'application/json',
-				}));
+		$("graphSave").onclick = () => {
+			const a = document.createElement("a"),
+				u = URL.createObjectURL(
+					new Blob([this.toJSON()], {
+						type: "application/json"
+					})
+				);
 			document.body.append(a);
 			a.href = u;
-			a.download = 'sessions.json';
+			a.download = "sessions.json";
 			a.click();
 			a.remove();
 			URL.revokeObjectURL(u);
@@ -155,14 +165,12 @@ class Sessions {
 		document.ondrop = async event => {
 			event.preventDefault();
 			if (event.dataTransfer.files.length == 0) return;
-			this.load(JSON.parse(
-				await event.dataTransfer.files[0].text()
-			));
+			this.load(JSON.parse(await event.dataTransfer.files[0].text()));
 			this.storageSave();
 			this.drop.hidden = true;
 		};
-		document.ondragleave = () => this.drop.hidden = true;
-		document.ondragover = () => this.drop.hidden = false;
+		document.ondragleave = () => (this.drop.hidden = true);
+		document.ondragover = () => (this.drop.hidden = false);
 	}
 	// Load data from obj.
 	load(obj) {
@@ -187,14 +195,18 @@ class Sessions {
 	// Return all days in JSON format: { days: value, ...}, days is in
 	// the format: "2021-01-01T00:00:00.000Z"
 	toJSON() {
-		return '{\n' + Array.from(this.days.entries())
-			.map(([d, nb]) => `"${new Date(d).toJSON()}": ${nb}`)
-			.join(',\n') + '\n}\n';
+		return (
+			"{\n" +
+			Array.from(this.days.entries())
+				.map(([d, nb]) => `"${new Date(d).toJSON()}": ${nb}`)
+				.join(",\n") +
+			"\n}\n"
+		);
 	}
 	// Get the max number of work session from all days.
 	max() {
 		let m = 0;
-		this.days.forEach(nb => m = Math.max(m, nb))
+		this.days.forEach(nb => (m = Math.max(m, nb)));
 		return m;
 	}
 	// Increment the number of working session today.
@@ -213,20 +225,21 @@ class Sessions {
 
 		for (let [k, nb] of this.days.entries()) {
 			const d = new Date(k),
-				div = document.createElement('div');
+				div = document.createElement("div");
 			this.graph.append(div);
-			div.classList.add(`graph-nb-${nb?Math.round(nb*4/max)+1:0}`);
-			div.style.gridColumnStart = Math.trunc(
-				(offset + (k - this.firstDayOfTheYear) / Sessions.DAY) / 7
-			) + 1;
-			div.style.gridRowEnd = (d.getDay() - 1 + 7) % 7 + 1;
-			div.addEventListener('mouseover', () => {
+			div.classList.add(`graph-nb-${nb ? Math.round((nb * 4) / max) + 1 : 0}`);
+			div.style.gridColumnStart =
+				Math.trunc((offset + (k - this.firstDayOfTheYear) / Sessions.DAY) / 7) + 1;
+			div.style.gridRowEnd = ((d.getDay() - 1 + 7) % 7) + 1;
+			div.addEventListener("mouseover", () => {
 				this.graphText.innerText = `[${nb}] ${d.toLocaleDateString()}`;
 			});
 		}
 	}
 }
 
-document.readyState == 'loading' ? document.addEventListener('DOMContentLoaded', main, {
-	once: true
-}) : main();
+document.readyState == "loading"
+	? document.addEventListener("DOMContentLoaded", main, {
+			once: true
+	  })
+	: main();
