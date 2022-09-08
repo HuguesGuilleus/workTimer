@@ -156,7 +156,7 @@ class Sessions {
 				);
 			document.body.append(a);
 			a.href = u;
-			a.download = "sessions.json";
+			a.download = "workTimer-" + new Date().getFullYear() + ".json";
 			a.click();
 			a.remove();
 			URL.revokeObjectURL(u);
@@ -196,13 +196,11 @@ class Sessions {
 	// Return all days in JSON format: { days: value, ...}, days is in
 	// the format: "2021-01-01T00:00:00.000Z"
 	toJSON() {
-		return (
-			"{\n" +
-			Array.from(this.days.entries())
-				.map(([d, nb]) => `"${new Date(d).toJSON()}": ${nb}`)
-				.join(",\n") +
-			"\n}\n"
-		);
+		const m = {};
+		for (const [d, nb] of this.days.entries()) {
+			m[new Date(d).toJSON()] = nb;
+		}
+		return JSON.stringify(m, null, "\t");
 	}
 	// Get the max number of work session from all days.
 	max() {
