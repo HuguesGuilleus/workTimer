@@ -226,10 +226,15 @@ class Sessions {
 			const d = new Date(k),
 				div = document.createElement("div");
 			this.graph.append(div);
-			div.classList.add(`graph-nb-${nb ? Math.round((nb * 4) / max) + 1 : 0}`);
+
+			if (nb)
+				div.style.backgroundColor =
+					"hsl(210, 100%, " + (((max - nb) * 85) / max + 10) + "%)";
+
 			div.style.gridColumnStart =
 				Math.trunc((offset + (k - this.firstDayOfTheYear) / Sessions.DAY) / 7) + 1;
 			div.style.gridRowEnd = ((d.getDay() - 1 + 7) % 7) + 1;
+
 			div.addEventListener("mouseover", () => {
 				this.graphText.innerText = `[${nb}] ${d.toLocaleDateString()}`;
 			});
