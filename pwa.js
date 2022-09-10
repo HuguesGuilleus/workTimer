@@ -1,42 +1,41 @@
-// Copyright 2020, GUILLEUS Hugues <ghugues@netc.fr>
+// Copyright 2022, GUILLEUS Hugues <ghugues@netc.fr>
 // BSD 3-Clause License
 
-(async function () {
-	function $(id) {
-		return document.getElementById(id);
-	}
+(async _ => {
+	const serviceWorker = navigator.serviceWorker,
+		pwaInstallation = document.getElementById("pwaInstallation"),
+		pwaMessage = document.getElementById("pwaMessage"),
+		pwaUpdate = document.getElementById("pwaUpdate");
 
-	function $t(id, def) {
-		const e = $(id);
-		if (!e) {
-			console.warn(`No found element#${id} to get text.`);
-			return def;
-		}
-		return e.innerText;
-	}
-
-	if (!('serviceWorker' in navigator)) {
-		console.warn('serviceWorker is not supported');
+	if (!serviceWorker) {
+		console.info("no service worker");
 		return;
 	}
 
-	const registration = await (navigator.serviceWorker.controller ?
-		navigator.serviceWorker.getRegistration() :
-		navigator.serviceWorker.register('sw.js')
-	);
+	const registration = await serviceWorker.register("sw.js");
 
-	const pwdNeedNetwork = $t('pwdNeedNetwork', 'PWA installation need network.'),
-		pwdCurrentUpdate = $t('pwdCurrentUpdate', 'The PWA are updating.'),
-		pwaUpdate = $('pwaUpdate');
-	if (!pwaUpdate) {
-		console.warn('There are not #pwaUpdate element.');
-		return;
+	// UPDATE
+	if (pwaUpdate) {
+		pwaUpdate.hidden = false;
+		pwaUpdate.addEventListener("click", _ =>
+			registration
+				.update("sw.js")
+				.then(
+					({installing}) =>
+						((installing || {}).onstatechange = _ =>
+							installing.state == "activated" && document.location.reload())
+				)
+		);
 	}
-	pwaUpdate.hidden = false;
-	pwaUpdate.addEventListener('click', async () => {
-		if (!navigator.onLine) return window.alert(pwdNeedNetwork);
-		document.body.innerText = pwdCurrentUpdate;
-		await registration.unregister();
-		document.location.reload();
+
+	// INSTALLATION
+	window.addEventListener("beforeinstallprompt", event => {
+		if (!pwaInstallation)
+			return console.warn("There are no #pwaInstallation element");
+
+		pwaInstallation.hidden = false;
+		pwaInstallation.addEventListener("click", () =>
+			event.prompt().catch(console.error)
+		);
 	});
 })();

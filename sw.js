@@ -1,50 +1,66 @@
-// Copyright 2020, GUILLEUS Hugues <ghugues@netc.fr>
-// BSD 3-Clause License
+// Copyright 2022, GUILLEUS Hugues <ghugues@netc.fr>
 
-const assetsVersion = "x2";
-const assets = [
-	'.',
-	'audio/1.mp3',
-	'audio/2.mp3',
-	'favicon.png',
-	'index.html',
-	'index.js',
-	'manifest.webmanifest',
-	'pwa.js',
-	'style.css',
-];
-
-if (location.hostname !== 'localhost') {
-	var c = null;
-	self.addEventListener('install', async event => {
-		await Promise.all(
-			(await caches.keys())
-			.map(c => caches.delete(c))
-		);
-		c = await caches.open(assetsVersion);
-		skipWaiting();
-		c.addAll(assets);
-	});
-
-	self.addEventListener('fetch', event => event.respondWith(
-		c.match(event.request).then(rep => rep ||
-			fetch(event.request).then(rep => {
-				if (!rep.ok) throw new TypeError('Bad response status');
-				caches.open(assetsVersion).then(c => c.put(event.request, rep));
-				return rep.clone();
-			}).catch(err => new Response('fetch error, maybe the navigator is offline.\n' + err, {
-				status: 404,
-				statusText: 'offline',
-			}))
+((
+	CACHE_VERSION,
+	{addEventListener, caches} = self,
+	currentCache,
+	initCurrentCache = () =>
+		currentCache
+			? Promise.resolve(currentCache)
+			: caches.open(CACHE_VERSION).then(_cache => (currentCache = _cache))
+) => {
+	addEventListener("install", event =>
+		event.waitUntil(
+			initCurrentCache()
+				.then(_ =>
+					currentCache.addAll(
+						[
+							".",
+							"audio/1.mp3",
+							"audio/2.mp3",
+							"favicon.png",
+							"index.html",
+							"index.js",
+							"manifest.webmanifest",
+							"pwa.js",
+							"style.css"
+						].map(url => new Request(url, {cache: "reload"}))
+					)
+				)
+				.then(skipWaiting)
 		)
-	));
-} else {
-	console.warn('Service worker in dev mode');
-	self.addEventListener('install', async () => {
-		skipWaiting();
-		(await caches.keys()).forEach(c => caches.delete(c))
-	});
-	self.addEventListener('fetch', event => event.respondWith(
-		fetch(event.request)
-	));
-}
+	);
+
+	addEventListener(
+		"activate",
+		event =>
+			clients.claim() |
+			caches
+				.keys()
+				.then(cacheKeysArray =>
+					cacheKeysArray.forEach(
+						cacheKey => cacheKey != CACHE_VERSION && caches.delete(cacheKey)
+					)
+				)
+	);
+
+	addEventListener("fetch", event =>
+		event.respondWith(
+			initCurrentCache()
+				.then(_ => currentCache.match(event.request))
+				.then(
+					cachedResponse =>
+						cachedResponse ||
+						fetch(event.request).then(
+							fetchedResponse =>
+								[
+									fetchedResponse.ok &&
+										currentCache.put(event.request, fetchedResponse.clone()),
+									fetchedResponse
+								][1]
+						)
+				)
+				.catch(_ => {})
+		)
+	);
+})("v0");
