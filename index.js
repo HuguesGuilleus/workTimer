@@ -124,7 +124,7 @@ class Sessions {
 	}
 	// Return the present day ready for indexing.
 	static now() {
-		return Sessions.set2Day(Date.now() - TIMEZONE_OFFSET);
+		return Sessions.set2Day(Date.now() - Sessions.TIMEZONE_OFFSET);
 	}
 	// Create a new Session object from json string.
 	static fromJSON(j) {
