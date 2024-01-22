@@ -1,14 +1,14 @@
 {
-	"name": "Work Timer",
-	"short_name": "workTimer",
-	"description": "Simple timer for work",
-	"start_url": ".",
-	"display": "standalone",
-	"icons": [{
-		"src": "favicon.png",
-		"sizes": "512x512",
-		"type": "image/png"
-	}],
-	"background_color": "silver",
-	"theme_color": "silver"
+  "name": "Work Timer",
+  "short_name": "workTimer",
+  "description": "Simple timer for work",
+  "start_url": ".",
+  "display": "standalone",
+  "icons": [{
+    "src": "favicon.png",
+    "sizes": "512x512",
+    "type": "image/png"
+  }],
+  "background_color": "silver",
+  "theme_color": "silver"
 }

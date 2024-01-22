@@ -1,4 +1,4 @@
-/* Octobre 2020 GUILLEUS Hugues ghugues[at]netc.fr */
+/* Octobre 2020-2024 GUILLEUS Hugues ghugues[at]netc.fr */
 
 body {
 	font-family: sans-serif;
@@ -12,7 +12,7 @@ main {
 	min-height: 100vh;
 }
 
-#run > * {
+#run>* {
 	display: table;
 	margin: auto;
 }
@@ -47,12 +47,13 @@ button {
 	margin: 2ex 0 1ex;
 }
 
-#graph > div {
+#graph>div {
 	height: 1.1ex;
 	border-radius: 0.15ex;
 	background-color: hsl(0, 0%, 90%);
 }
-#graph > div:hover {
+
+#graph>div:hover {
 	background: green !important;
 }
 
@@ -62,6 +63,7 @@ button {
 	padding: 0.1ex;
 	font-size: smaller;
 }
+
 #graphSave:hover {
 	background: Field;
 	color: FieldText;
