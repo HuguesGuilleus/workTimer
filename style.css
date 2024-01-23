@@ -1,5 +1,9 @@
 /* Octobre 2020-2024 GUILLEUS Hugues ghugues[at]netc.fr */
 
+[hidden] {
+	display: none !important;
+}
+
 body {
 	font-family: sans-serif;
 	font-size: x-large;
@@ -57,16 +61,15 @@ button {
 	background: green !important;
 }
 
-#graphSave {
+#graphSave,
+#graphLast {
 	display: table;
-	margin-bottom: 1ex;
 	padding: 0.1ex;
 	font-size: smaller;
 }
 
 #graphSave:hover {
-	background: Field;
-	color: FieldText;
+	background: dodgerblue;
 }
 
 /* DROP ZONE */

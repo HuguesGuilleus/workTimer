@@ -29,8 +29,9 @@
 		Nombre de minutes pour le bonus&nbsp;: <input type=number id=delayExtra value=3><br>
 		Nombre de minutes pour la pause&nbsp;: <input type=number id=delayBreak value=2><br>
 		<div id=graph></div>
-		<div id=graphSave>Save the sessions</div>
-		<div id=graphText></div>
+		<div id=graphText>&nbsp;</div>
+		<div id=graphSave>Sauvegarder les données</div>
+		<div id=graphLast>&nbsp;</div>
 	</main>
 
 	<main id=run hidden>
@@ -43,7 +44,7 @@
 				a 40 40 0 0 1 0 -80" />
 			<text id=out x="50" y="50" text-anchor="middle" dy="7" font-size="20">00:00</text>
 		</svg>
-		<button type=click id=stop>Stop</button>
+		<button type=click id=stopTimer>Stop</button>
 	</main>
 
 	<footer>
@@ -51,10 +52,10 @@
 			<i>localStorage</i>, elle n'est en aucun cas envoyée vers le serveur.
 		</p>
 		<button type="button" id=removeData>Effacer la liste des séances</button>
-		<button type="button" id=pwaUpdate>Mise à jour</button>
-		<button type="button" id=pwaInstallation>Installation</button>
+		<button type="button" id=pwaUpdate hidden>Mise à jour</button>
+		<button type="button" id=pwaInstallation hidden>Installation</button>
 		<br>
-		Développé en 2020 et 2021 par Hugues GUILLEUS, ghugues[at]netc[dot]fr<br>
+		Développé entre 2020 et 2024 par Hugues GUILLEUS, ghugues[at]netc[dot]fr<br>
 		BSD 3-Clause License<br>
 		Sauf les sons qui viennes de&nbsp;: <a href="https://lasonotheque.org/">LaSonotheque.org</a>
 	</footer>

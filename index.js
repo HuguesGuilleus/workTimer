@@ -1,87 +1,53 @@
 // Octobre 2020-2024 GUILLEUS Hugues ghugues[at]netc.fr
 
-var timer = null,
-  sessions = null,
-  out,
-  bar;
-
 const SECOND = 1000,
   MINUTE = 60 * SECOND,
-  barCircumference = Math.PI * 2 * 40;
-
-function main() {
-  sessions = Sessions.storageImport();
-  const delayWork = $("delayWork");
-  const delayExtra = $("delayExtra");
-  const delayBreak = $("delayBreak");
-  out = $("out");
-  bar = $("bar");
-
-  function stop() {
-    if (timer) timer.drop();
-  }
-
-  $("goWork").addEventListener("click", () => {
-    stop();
-    Notification.requestPermission((r) => {});
-    timer = new Timer(delayWork.value * MINUTE, true);
-  });
-  $("goExtra").addEventListener("click", () => {
-    stop();
-    Notification.requestPermission((r) => {});
-    timer = new Timer(delayExtra.value * MINUTE, false);
-  });
-  $("goBreak").addEventListener("click", () => {
-    stop();
-    Notification.requestPermission((r) => {});
-    timer = new Timer(delayBreak.value * MINUTE, false);
-  });
-  $("stop").addEventListener("click", stop);
-  $("removeData").addEventListener("click", () => {
-    if (
-      window.confirm(
-        "Étes vous sur de vouloir effacer vos donné, vous ne pourez plus les récupérer.",
-      )
-    ) {
-      Sessions.removeData();
-    }
-  });
-}
+  DAY = 24 * 60 * MINUTE,
+  BAR_CIRCUMFERENCE = Math.PI * 2 * 40;
 
 class Timer {
-  constructor(delay, towork) {
-    this.towork = towork;
+  // Create a timer.
+  // @param {delay} number of millisecond for delay to finish.
+  // @param {sessions} session storage of nothing.
+  constructor(delay, sessions) {
     this.delay = delay;
+    this.sessions = sessions;
     this.begin = new Date();
-    this.interval = setInterval(() => this.update(), SECOND / 60);
+    this.interval = setInterval(() => this.display(), SECOND / 60);
     this.timeout = setTimeout(() => this.end(), delay);
-    Timer.printDuration(0, 0);
-    bar.style.strokeDasharray = "0 " + barCircumference;
-    $("launch").hidden = true;
-    $("run").hidden = false;
+    stopTimer.onclick = () => this.stop();
+    launch.hidden = true;
+    run.hidden = false;
+    this.display();
+    Notification.requestPermission();
   }
-  update() {
-    const delay = Math.trunc((new Date() - this.begin) / SECOND);
-    const m = Math.trunc(delay / (MINUTE / SECOND));
-    const s = delay % (MINUTE / SECOND);
-    Timer.printDuration(m, s);
-    bar.style.strokeDasharray = `${
-      ((new Date() - this.begin) *
-        barCircumference) /
-      this.delay
-    } ${barCircumference}`;
+
+  // Update the display.
+  display() {
+    function format(n) {
+      return n.toLocaleString("nu-arabic", {
+        minimumIntegerDigits: 2,
+      });
+    }
+    const elapse = Date.now() - this.begin;
+    const minute = Math.trunc(elapse / SECOND) % MINUTE;
+    const second = Math.trunc(elapse / MINUTE);
+    out.textContent = format(minute) + ":" + format(second);
+    bar.style.strokeDasharray = (elapse * BAR_CIRCUMFERENCE) / this.delay +
+      " " + BAR_CIRCUMFERENCE;
   }
-  drop() {
+
+  // Stop timers and print lauch pannel
+  stop() {
     clearTimeout(this.timeout);
     clearInterval(this.interval);
-    $("launch").hidden = false;
-    $("run").hidden = true;
-    bar.style.strokeDasharray = barCircumference + " " + barCircumference;
-    Timer.printDuration(0, 0);
+    launch.hidden = false;
+    run.hidden = true;
   }
+  // Stop, add this session, make a notification and play audio.
   async end() {
-    this.drop();
-    if (this.towork) sessions.addToday();
+    this.stop();
+    this.sessions?.add(this.begin);
 
     new Notification("Fin décompte", {
       body: `Décompte de ${Math.trunc(this.delay / MINUTE)}`,
@@ -90,164 +56,141 @@ class Timer {
       tag: "vibration-sample",
     });
 
+    const audios = [];
     for (let i = 0; i < 5; i++) {
-      new Audio(`audio/${Math.trunc(Math.random() * 2) + 1}.mp3`).play();
-      await wait(200);
+      const audio = new Audio(`audio/${Math.trunc(Math.random() * 2) + 1}.mp3`);
+      audios.push(audio);
+      audio.play().catch(() => {});
+      await new Promise((end) => setTimeout(end, 200));
     }
-  }
-  static printDuration(m, s) {
-    const pn = (n) =>
-      n.toLocaleString("nu-arabic", {
-        minimumIntegerDigits: 2,
-      });
-    out.textContent = `${pn(m)}:${pn(s)}`;
+    await new Promise((end) => setTimeout(end, 1000));
+    audios.forEach((a) => a.pause());
   }
 }
 
-// Return a promise that resolve in the delay milisecond in the future.
-function wait(delay) {
-  return new Promise((end) => setTimeout(end, delay));
-}
-
-// Get element with the id.
-function $(id) {
-  return document.getElementById(id);
-}
-
-// Save, restore and display all work sessions of this year.
 class Sessions {
-  static STORAGE = "work-sessions";
-  static DAY = 24 * 3600 * 1000;
-  static TIMEZONE_OFFSET = new Date().getTimezoneOffset();
-  // Return the millisecond 0 of the day d (in millisecond since Epoch).
-  // Used to uniform the day index.
-  static set2Day(d) {
-    return Math.trunc(d / Sessions.DAY) * Sessions.DAY;
-  }
-  // Return the present day ready for indexing.
-  static now() {
-    return Sessions.set2Day(Date.now() - Sessions.TIMEZONE_OFFSET);
-  }
-  // Create a new Session object from json string.
-  static fromJSON(j) {
-    return new Sessions(JSON.parse(j));
-  }
-  static storageImport() {
-    return Sessions.fromJSON(window.localStorage.getItem(Sessions.STORAGE));
-  }
-  // remove the data in local storage and recreate a new sessions instante.
-  static removeData() {
-    window.localStorage.removeItem(Sessions.STORAGE);
-    sessions = new Sessions();
-  }
-  storageSave() {
-    window.localStorage.setItem(Sessions.STORAGE, this.toJSON());
-  }
-  constructor(obj) {
-    this.graph = $("graph");
-    this.graphText = $("graphText");
-    this.drop = $("drop");
-    this.load(obj);
+  static #STORAGE = "work-sessions";
 
-    $("graphSave").onclick = () => {
-      const a = document.createElement("a"),
-        u = URL.createObjectURL(
-          new Blob([this.toJSON()], {
-            type: "application/json",
-          }),
-        );
-      document.body.append(a);
-      a.href = u;
-      a.download = "workTimer-" + new Date().getFullYear() + ".json";
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(u);
-    };
-
-    document.ondragover = (event) => event.preventDefault();
-    document.ondrop = async (event) => {
-      event.preventDefault();
-      if (event.dataTransfer.files.length == 0) return;
-      this.load(JSON.parse(await event.dataTransfer.files[0].text()));
-      this.storageSave();
-      this.drop.hidden = true;
-    };
-    document.ondragleave = () => (this.drop.hidden = true);
-    document.ondragover = () => (this.drop.hidden = false);
+  // Return a key string (used by days) from a date.
+  static #date2key(date) {
+    return date.getFullYear() + "-" +
+      (date.getMonth() + 1) + "-" +
+      date.getDate();
   }
-  // Load data from obj.
+
+  #days = new Map();
+  constructor() {
+    this.load(localStorage.getItem(Sessions.#STORAGE));
+  }
+
+  // Clear all data (local storage and display).
+  clear() {
+    graphLast.innerText = "";
+    this.load();
+  }
+
+  // Load data save it and display it.
   load(obj) {
-    // Recreate the calendar of this year.
-    this.firstDayOfTheYear = new Date(new Date().getFullYear(), 0);
-    this.days = new Map();
-    const now = Date.now();
-    let day = Sessions.set2Day(this.firstDayOfTheYear);
-    while (day < now) {
-      this.days.set(day, 0);
-      day += Sessions.DAY;
+    obj ||= "{}";
+    const now = new Date();
+
+    // Create a empty calendar
+    this.#days.clear();
+    for (
+      let day = new Date(now.getFullYear(), 0);
+      day < now;
+      day = 24 * 3600 * 1000 + day.valueOf()
+    ) {
+      this.#days.set(Sessions.#date2key(new Date(day)), 0);
     }
 
-    // From the gived object, load valid day that exist in this.days.
-    Object.keys(obj || {})
-      .map((k) => [Sessions.set2Day(Date.parse(k)), Number(obj[k])])
-      .filter(([d, nb]) => !isNaN(d) && this.days.has(d) && !isNaN(nb))
-      .forEach(([d, nb]) => this.days.set(d, nb));
-
-    this.display();
-  }
-  // Return all days in JSON format: { days: value, ...}, days is in
-  // the format: "2021-01-01T00:00:00.000Z"
-  toJSON() {
-    const m = {};
-    for (const [d, nb] of this.days.entries()) {
-      m[new Date(d).toJSON()] = nb;
+    // Load days from obj
+    for (let [day, nb] of Object.entries(JSON.parse(obj))) {
+      day = new Date(day);
+      nb = Number(nb);
+      if (
+        day.getFullYear() !== now.getFullYear() || day > now ||
+        day == "Invalid Date" || isNaN(nb)
+      ) continue;
+      this.#days.set(Sessions.#date2key(day), nb);
     }
-    return JSON.stringify(m, null, "\t");
-  }
-  // Get the max number of work session from all days.
-  max() {
-    let m = 0;
-    this.days.forEach((nb) => (m = Math.max(m, nb)));
-    return m;
-  }
-  // Increment the number of working session today.
-  addToday() {
-    const now = Sessions.now();
-    this.days.set(now, (this.days.get(now) || 0) + 1);
-    this.display();
-    this.storageSave();
-  }
-  // Refresh the graph.
-  display() {
-    Array.from(this.graph.children).forEach((item) => item.remove());
 
-    const offset = (this.firstDayOfTheYear.getDay() - 1 + 7) % 7;
-    const max = this.max() || 1;
+    this.#saveAndDisplay();
+  }
 
-    for (let [k, nb] of this.days.entries()) {
-      const d = new Date(k),
+  // Add +1 to the day.
+  add(day) {
+    graphLast.innerText = "Début de la dernière session: " +
+      day.toLocaleString();
+    const key = Sessions.#date2key(day);
+    this.#days.set(key, (this.#days.get(key) || 0) + 1);
+    this.#saveAndDisplay();
+  }
+
+  // Save and display days into #graph
+  #saveAndDisplay() {
+    localStorage.setItem(
+      Sessions.#STORAGE,
+      JSON.stringify(Object.fromEntries(this.#days)),
+    );
+    graph.innerText = "";
+
+    const first = new Date(new Date().getFullYear(), 0);
+    const offset = ((first.getDay() || 7) - 1) * DAY;
+    const max = Math.max(...this.#days.values());
+    for (const [key, nb] of this.#days) {
+      const day = new Date(key),
         div = document.createElement("div");
-      this.graph.append(div);
+      graph.append(div);
 
+      div.style.gridRowStart = day.getDay() || 7;
+      div.style.gridColumnStart = 1 + Math.trunc(
+        (day - first + offset) / (7 * DAY),
+      );
       if (nb) {
-        div.style.backgroundColor = "hsl(210, 100%, " +
-          (((max - nb) * 85) / max + 10) + "%)";
+        div.style.backgroundColor = `hsl(210,100%,${100 - nb * 90 / max}%)`;
       }
 
-      div.style.gridColumnStart =
-        Math.trunc((offset + (k - this.firstDayOfTheYear) / Sessions.DAY) / 7) +
-        1;
-      div.style.gridRowEnd = ((d.getDay() - 1 + 7) % 7) + 1;
-
-      div.addEventListener("mouseover", () => {
-        this.graphText.innerText = `[${nb}] ${d.toLocaleDateString()}`;
-      });
+      div.onmouseover = () => {
+        graphText.innerText = `[${nb}] ${day.toLocaleDateString()}`;
+      };
     }
+  }
+
+  download() {
+    const a = document.createElement("a");
+    document.body.append(a);
+    a.download = `workTimer-${new Date().getFullYear()}.json`;
+    a.href = URL.createObjectURL(
+      new Blob([JSON.stringify(Object.fromEntries(this.#days), null, "\t")], {
+        type: "application/json",
+      }),
+    );
+    a.click();
+    URL.revokeObjectURL(a.href);
+    a.remove();
   }
 }
 
-document.readyState == "loading"
-  ? document.addEventListener("DOMContentLoaded", main, {
-    once: true,
-  })
-  : main();
+(function () {
+  const sessions = new Sessions();
+  graphSave.onclick = () => sessions.download();
+  removeData.onclick = () => {
+    confirm(
+      "Êtes-vous sûrs de vouloir effacer vos données, vous ne pourez plus les récupérer.",
+    ) && sessions.clear();
+  };
+
+  goWork.onclick = () => new Timer(delayWork.value * MINUTE, sessions);
+  goExtra.onclick = () => new Timer(delayExtra.value * MINUTE);
+  goBreak.onclick = () => new Timer(delayBreak.value * MINUTE);
+
+  document.ondragleave = () => (drop.hidden = true);
+  document.ondragover = () => (drop.hidden = false);
+  document.ondrop = async (event) => {
+    event.preventDefault();
+    drop.hidden = true;
+    if (event.dataTransfer.files.length == 0) return;
+    sessions.load(await event.dataTransfer.files[0].text());
+  };
+})();
