@@ -30,10 +30,10 @@ class Timer {
       });
     }
     const elapse = Date.now() - this.begin;
-    const minute = Math.trunc(elapse / SECOND) % MINUTE;
-    const second = Math.trunc(elapse / MINUTE);
+    const second = Math.trunc(elapse / SECOND) % 60;
+    const minute = Math.trunc(elapse / MINUTE);
     out.textContent = format(minute) + ":" + format(second);
-    bar.style.strokeDasharray = (elapse * BAR_CIRCUMFERENCE) / this.delay +
+    bar.style.strokeDasharray = elapse * BAR_CIRCUMFERENCE / this.delay +
       " " + BAR_CIRCUMFERENCE;
   }
 
