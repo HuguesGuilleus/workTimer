@@ -47,7 +47,7 @@ class Timer {
   // Stop, add this session, make a notification and play audio.
   async end() {
     this.stop();
-    this.sessions?.add(this.begin);
+    this.sessions?.add();
 
     new Notification("Fin décompte", {
       body: `Décompte de ${Math.trunc(this.delay / MINUTE)}`,
@@ -119,8 +119,9 @@ class Sessions {
   }
 
   // Add +1 to the day.
-  add(day) {
-    graphLast.innerText = "Début de la dernière session: " +
+  add() {
+    const day = new Date();
+    graphLast.innerText = "Fin de la dernière session: " +
       day.toLocaleString();
     const key = Sessions.#date2key(day);
     this.#days.set(key, (this.#days.get(key) || 0) + 1);
