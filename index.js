@@ -73,9 +73,12 @@ class Sessions {
 
   // Return a key string (used by days) from a date.
   static #date2key(date) {
+    function nb2s(nb) {
+      return nb.toString().padStart(2, "0");
+    }
     return date.getFullYear() + "-" +
-      (date.getMonth() + 1) + "-" +
-      date.getDate();
+      nb2s(date.getMonth() + 1) + "-" +
+      nb2s(date.getDate());
   }
 
   #days = new Map();
@@ -136,24 +139,20 @@ class Sessions {
     );
     graph.innerText = "";
 
-    const first = new Date(new Date().getFullYear(), 0);
-    const offset = ((first.getDay() || 7) - 1) * DAY;
     const max = Math.max(...this.#days.values());
-    for (const [key, nb] of this.#days) {
-      const day = new Date(key),
-        div = document.createElement("div");
+    let offset = (new Date(new Date().getFullYear(), 0).getDay() || 7) - 1;
+    for (const [date, nb] of [...this.#days].sort(([a], [b]) => a > b)) {
+      const div = document.createElement("div");
       graph.append(div);
+      div.style.gridColumnStart = Math.trunc(offset / 7) + 1;
+      div.style.gridRowStart = offset % 7 + 1;
+      offset++;
 
-      div.style.gridRowStart = day.getDay() || 7;
-      div.style.gridColumnStart = 1 + Math.trunc(
-        (day - first + offset) / (7 * DAY),
-      );
       if (nb) {
         div.style.backgroundColor = `hsl(210,100%,${100 - nb * 90 / max}%)`;
       }
-
       div.onmouseover = () => {
-        graphText.innerText = `[${nb}] ${day.toLocaleDateString()}`;
+        graphText.innerText = `[${nb}] ${new Date(date).toLocaleDateString()}`;
       };
     }
   }
