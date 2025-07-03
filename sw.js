@@ -1,4 +1,4 @@
-// Copyright 2020-2024, GUILLEUS Hugues <ghugues@netc.fr>
+// Copyright 2020-2025, GUILLEUS Hugues <ghugues@netc.fr>
 
 ((
   CACHE_VERSION,
@@ -61,4 +61,4 @@
         )
         .catch((_) => {}),
     ));
-})("v2.3");
+})("v2.4");

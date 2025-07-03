@@ -70,6 +70,7 @@ class Timer {
 
 class Sessions {
   static #STORAGE = "work-sessions";
+  static #STORAGE_LAST = "work-last";
 
   // Return a key string (used by days) from a date.
   static #date2key(date) {
@@ -81,14 +82,17 @@ class Sessions {
       nb2s(date.getDate());
   }
 
+  #last = null;
   #days = new Map();
   constructor() {
+    const last = localStorage.getItem(Sessions.#STORAGE_LAST);
+    if (last) this.#last = new Date(last);
     this.load(localStorage.getItem(Sessions.#STORAGE));
   }
 
   // Clear all data (local storage and display).
   clear() {
-    graphLast.innerText = "";
+    this.#last = null;
     this.load();
   }
 
@@ -124,8 +128,7 @@ class Sessions {
   // Add +1 to the day.
   add() {
     const day = new Date();
-    graphLast.innerText = "Fin de la dernière session: " +
-      day.toLocaleString();
+    this.#last = day;
     const key = Sessions.#date2key(day);
     this.#days.set(key, (this.#days.get(key) || 0) + 1);
     this.#saveAndDisplay();
@@ -133,6 +136,15 @@ class Sessions {
 
   // Save and display days into #graph
   #saveAndDisplay() {
+    if (this.#last) {
+      graphLast.innerText = "Fin de la dernière session: " +
+        this.#last.toLocaleString();
+      localStorage.setItem(Sessions.#STORAGE_LAST, this.#last);
+    } else {
+      graphLast.innerText = "";
+      localStorage.removeItem(Sessions.#STORAGE_LAST);
+    }
+
     localStorage.setItem(
       Sessions.#STORAGE,
       JSON.stringify(Object.fromEntries(this.#days)),
